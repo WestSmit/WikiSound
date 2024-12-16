@@ -1,0 +1,61 @@
+﻿@page "/register";
+@using WikiSound.Client.Services;
+@using WikiSound.Shared.Auth;
+@inject IAuthService Auth;
+@inject NavigationManager Navigation;
+
+<PageTitle>Register</PageTitle>
+<div class="h1 text-center">Registration</div>
+<EditForm Model="registrationRequest" OnValidSubmit="Register" class="col-11 col-sm-8 col-md-6 col-lg-4 col-xl-2 m-auto text-light p-3 shadow border-bottom bg-light bg-opacity-10 rounded">
+    <DataAnnotationsValidator />
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email address</label>
+        <InputText @bind-Value="@registrationRequest.Email" type="email" class="form-control border-0" id="Email" aria-describedby="emailHelp"></InputText>
+        <ValidationMessage For="() => registrationRequest.Email" class="small text-danger"></ValidationMessage>
+    </div>
+    <div class="mb-3">
+        <label for="Email" class="form-label">Username</label>
+        <InputText @bind-Value="@registrationRequest.Username" type="text" class="form-control border-0" id="Username" aria-describedby="usernameHelp"></InputText>
+        <ValidationMessage For="() => registrationRequest.Username" class="small text-danger"></ValidationMessage>
+    </div>
+    <div class="mb-3">
+        <label for="Password" class="form-label">Password</label>
+        <InputText @bind-Value="registrationRequest.Password" type="password" class="form-control border-0" id="Password" min="6"></InputText>
+        <ValidationMessage For="() => registrationRequest.Password" class="small text-danger"></ValidationMessage>
+    </div>
+    <button type="submit" class="btn btn-success d-block m-auto">Submit</button>
+    @foreach (var error in @errors)
+    {
+        <div class="text-danger m-1">@error.Key
+            @foreach (var message in @error.Value)
+            {
+                <div class="small m-1">@message</div>
+            }
+        </div>
+    }
+</EditForm>
+
+@code {
+    private RegistrationRequest registrationRequest = new();
+    private Dictionary<string, string[]> errors = new Dictionary<string, string[]>();
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+
+    }
+
+    private async Task Register()
+    {
+        var res = await Auth.RegisterAsync(registrationRequest);
+        if (res.Succeeded && res.Errors.Count == 0)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            errors = res.Errors;
+        }
+    }
+
+}

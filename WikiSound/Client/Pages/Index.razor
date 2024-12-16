@@ -1,0 +1,83 @@
+﻿@page "/{page:int?}"
+@using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+@using WikiSound.Shared;
+@using WikiSound.Client.Components;
+@using WikiSound.Client.Services;
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IArtistsService ArtistsService
+
+<PageTitle>Home</PageTitle>
+
+@if (pageData is not null)
+{
+    <div class="row gap-2 justify-content-center">
+        @foreach (var artist in pageData.Items)
+        {
+            <ArtistListItem Artist="@artist"></ArtistListItem>
+        }
+    </div>
+
+    <nav aria-label="Page navigation" class="mt-2">
+        <ul class="pagination m-auto justify-content-center gap-1">
+            @if (pageData.PageNumber != 1)
+            {
+                <li class="page-item">
+                    <span class="btn btn-dark" @onclick="async () => await ToPage(1)">First</span>
+                </li>
+            }
+
+            @if (pageData.HasPreviousPage)
+            {
+                <li class="page-item">
+                    <span class="btn btn-dark" @onclick="async () => await ToPage(pageData.PageNumber - 1)">@(pageData.PageNumber - 1)</span>
+                </li>
+            }
+
+            <li class="page-item">
+                <span class="btn btn-light">@pageData.PageNumber</span>
+            </li>
+
+            @if (pageData.HasNextPage)
+            {
+                <li class="page-item">
+                    <span class="btn btn-dark" @onclick="async () => await ToPage(pageData.PageNumber + 1)">@(pageData.PageNumber + 1)</span>
+                </li>
+            }
+
+            @if (pageData.PageNumber != pageData.TotalPages)
+            {
+                <li class="page-item">
+                    <span class="btn btn-dark" @onclick="async () => await ToPage(pageData.TotalPages)">Last</span>
+                </li>
+            }
+        </ul>
+    </nav>
+}
+else
+{
+    <div>No data</div>
+}
+
+
+@code {
+    private Page<ArtistListPageItem>? pageData = null;
+
+    [Parameter]
+    public int? Page { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ToPage(Page ?? 1);
+    }
+
+    private async Task ToPage(int page)
+    {
+        pageData = await ArtistsService.GetArtistListPageDataAsync(page);
+
+        var a = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        Console.WriteLine(a.Query);
+
+        NavigationManager.NavigateTo($"/{pageData.PageNumber}");
+    }
+}

@@ -1,0 +1,80 @@
+﻿@page "/albums/{id:int}";
+@using WikiSound.Shared;
+@using WikiSound.Client.Components;
+@using WikiSound.Client.Services;
+@inject NavigationManager NavigationManager;
+@inject IArtistsService ArtistsService;
+
+@if (album is not null)
+{
+    <PageTitle>@album.Name</PageTitle>
+    <div class="top-section">
+        <div class="top-section-banner" style="background-image: linear-gradient(180deg, rgba(245, 246, 252, 0.3) 1%, rgba(33, 37, 41, 1) 90%), url(@album.AlbumCDart)"></div>
+        <div class="top-section-content container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a class="btn text-success p-0" href="/">Artists list</a></li>
+                    <li class="breadcrumb-item"><a class="btn text-success p-0" @onclick="ToArtist">@album.ArtistName</a></li>
+                    <li class="breadcrumb-item"><a class="btn text-light p-0 disabled">@album.Name</a></li>
+                </ol>
+            </nav>
+            <div class="row gap-2 text-light">
+                <div class="col-10 col-md-4 col-lg-4 col-xl-3 text-muted">
+                    <img src="@album.AlbumThumb" class="img-thumbnail shadow" alt="ArtistThumb">
+                </div>
+                <div class="col">
+                    <div class="card-body pt-0">
+                        <div class="text-muted small">
+                            <a class="btn p-0 text-success align-baseline" @onclick="ToArtist">@album.ArtistName</a>
+                            @album.ReleaseFormat
+                        </div>
+                        <h1 class="card-title fw-bold">@album.Name</h1>
+                    <p class="card-text">@album.DescriptionEN.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mb-5 pt-2">
+        <ArtistTrackList Tracks="album.Tracks"></ArtistTrackList>
+    </div>
+}
+else
+{
+    <PageTitle>Loading...</PageTitle>
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+
+@code {
+    private AlbumDetails? album;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+
+        await LoadAlbum();
+    }
+
+    private async Task LoadAlbum()
+    {
+        album = await ArtistsService.GetAlbumDetailsAsync(Id);
+    }
+
+    private void ToArtist()
+    {
+        NavigationManager.NavigateTo($"/artist/{album.ArtistId}");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        base.OnParametersSetAsync();
+
+        await LoadAlbum();
+    }
+
+}

@@ -1,0 +1,38 @@
+﻿@using WikiSound.Shared;
+@inject NavigationManager Navigation;
+
+<div class="text-light mb-4">
+    <div class="h3">Tracks</div>
+    @foreach (var track in Tracks)
+    {
+        <div class="row p-2 border-bottom border-secondary cursor-pointer btn-outline-secondary" @onclick="() => ToTrack(track.Id)">
+            <div class="col-auto p-0">
+                @if (track.TrackThumb is not null)
+                {
+                    <img class="" src="@track.TrackThumb" style="width: 32px" />
+                }
+                else
+                {
+                    <span class="oi oi-musical-note p-1 h5 m-0" aria-hidden="true" style="width: 32px; height: 32px"></span>
+                }
+            </div>
+            <div class="col mt-1">
+                @track.Name
+            </div>
+            <div class="col-auto">
+                @track.Score
+            </div>
+        </div>
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public TrackListItem[] Tracks { get; set; }
+
+    private void ToTrack(int id)
+    {
+        Navigation.NavigateTo($"/tracks/{id}");
+    }
+}

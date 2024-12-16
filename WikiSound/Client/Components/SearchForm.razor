@@ -1,0 +1,87 @@
+﻿@using WikiSound.Shared.Search;
+@using WikiSound.Client.Services;
+@inject IArtistsService ArtistsService;
+@inject NavigationManager Navigation;
+
+
+
+<div class="h-100 m-0">
+    <div class="input-group">
+        <InputText @bind-Value="searchString" class="form-control bg-dark shadow text-light search-input" @oninput="e => Input(e)" @onfocus="() => showDropdown = false"></InputText>
+
+        @if (searchString.Length > 0)
+        {
+            <button class="btn btn-dark input-group-text border-light" @onclick="Clear"><span class="oi oi-x" aria-hidden="true"></span></button>
+        }
+        else
+        {
+            <button class="btn btn-dark border-light text-muted disabled"><span class="oi oi-magnifying-glass" aria-hidden="true"></span></button>
+        }
+    </div>
+    @if (showDropdown)
+    {
+        <div class="d-block dropdown-menu p-0 col-11 col-md-7 col-lg-5 col-xl-3 shadow-lg">
+            @foreach (var suggestion in suggestions)
+            {
+                <div class="card border-0 border-bottom rounded-0 btn bg-dark btn-outline-secondary text-start p-0" @onclick="() => ToArtistPage(suggestion.Id)">
+                  <div class="row g-0">
+                    <div class="col-4">
+                        <img src="@suggestion.ArtistThumb" class="img-fluid" alt="ArtistThumb">
+                    </div>
+                    <div class="col-8">
+                      <div class="card-body">
+                        <h5 class="card-title">@suggestion.Name</h5>
+                        <p class="card-text">@FormatText(suggestion.BiographyEN)</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private string searchString = string.Empty;
+    private bool showDropdown = false;
+    private SuggestionArtistItem[] suggestions = new SuggestionArtistItem[0];
+
+    void Clear()
+    {
+        searchString = string.Empty;
+        showDropdown = false;
+    }
+
+    async Task Input(ChangeEventArgs e)
+    {
+        searchString = e.Value?.ToString() ?? string.Empty;
+
+        if (searchString.Length < 1)
+        {
+            showDropdown = false;
+            return;
+        }
+
+        suggestions = await ArtistsService.GetArtistSearchSaggestionsAsync(searchString);
+
+        if (suggestions is null || suggestions.Length == 0)
+        {
+            showDropdown = false;
+            return;
+        }
+
+        showDropdown = true;
+    }
+
+    string FormatText(string text)
+    {
+        return text is not null && text.Length > 50 ? text.Substring(0, 50) + "..." : string.Empty;
+    }
+
+    void ToArtistPage(int id)
+    {
+        Clear();
+        Navigation.NavigateTo($"/artist/{id}");
+    }
+
+}

@@ -1,0 +1,84 @@
+﻿@page "/tracks/{id:int}";
+@using WikiSound.Shared;
+@using WikiSound.Client.Components;
+@using WikiSound.Client.Services;
+@inject IArtistsService ArtistsService;
+@inject NavigationManager NavigationManager;
+
+@if (track is not null)
+{
+    <PageTitle>@track.Name</PageTitle>
+    <div class="top-section">
+        <div class="top-section-banner" style="background-image: linear-gradient(180deg, rgba(245, 246, 252, 0.3) 1%, rgba(33, 37, 41, 1) 90%), url(@track.Track3DCase)"></div>
+        <div class="top-section-content container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a class="btn text-success p-0" href="/">Artists list</a></li>
+                    <li class="breadcrumb-item"><a class="btn text-success p-0" @onclick="ToArtist">@track.ArtistName</a></li>
+                    <li class="breadcrumb-item"><a class="btn text-success p-0" @onclick="ToAlbum">@track.AlbumName</a></li>
+                    <li class="breadcrumb-item"><a class="btn text-light p-0 disabled">@track.Name</a></li>
+                </ol>
+            </nav>
+            <div class="row gap-2 text-light">
+                <div class="col-10 col-md-4 col-lg-4 col-xl-3 text-muted">
+                    <img src="@track.TrackThumb" class="img-thumbnail shadow" alt="ArtistThumb">
+                </div>
+                <div class="col">
+                    <div class="card-body pt-0">
+                        <div class="text-muted small">
+                            <a class="btn p-0 text-success align-baseline" @onclick="ToArtist">@track.ArtistName</a>
+                            track from
+                            <a class="btn p-0 text-success align-baseline" @onclick="ToAlbum">@track.AlbumName</a>
+                            album
+                        </div>
+                        <h1 class="card-title fw-bold">@track.Name</h1>
+                    <p class="card-text">@track.DescriptionEN.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <PageTitle>Loading...</PageTitle>
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+
+@code {
+    private TrackDetails? track;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+
+        await LoadTrack();
+    }
+
+    private async Task LoadTrack()
+    {
+        track = await ArtistsService.GetTrackDetailsAsync(Id);
+    }
+
+    private void ToArtist()
+    {
+        NavigationManager.NavigateTo($"/artist/{track.ArtistId}");
+    }
+
+    private void ToAlbum()
+    {
+        NavigationManager.NavigateTo($"/albums/{track.AlbumId}");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        base.OnParametersSetAsync();
+
+        await LoadTrack();
+    }
+}

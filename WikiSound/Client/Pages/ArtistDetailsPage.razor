@@ -1,0 +1,79 @@
+﻿@page "/artist/{id:int}"
+@using WikiSound.Client.Services;
+@using WikiSound.Shared;
+@using WikiSound.Client.Components;
+@inject IArtistsService ArtistsService;
+@inject NavigationManager NavigationManager
+
+@if (artist is not null)
+{
+    <PageTitle>@artist.Name</PageTitle>
+    <div class="top-section">
+        <div class="top-section-banner" style="background-image: linear-gradient(180deg, rgba(245, 246, 252, 0.3) 1%, rgba(33, 37, 41, 1) 90%), url(@artist.ArtistBanner)"></div>
+        <div class="top-section-content container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a class="btn text-success p-0" href="/">Artists list</a></li>
+                    <li class="breadcrumb-item"><a class="btn text-light p-0 disabled">@artist.Name</a></li>
+                </ol>
+            </nav>
+            <div class="row gap-2 text-light">
+                <div class="col-10 col-md-4 col-lg-4 col-xl-3 text-muted">
+                    <img src="@artist.ArtistThumb" class="img-thumbnail shadow" alt="ArtistThumb">
+                </div>
+                <div class="col">
+                    <div class="card-body pt-0">
+                        <h1 class="card-title fw-bold">@artist.Name</h1>
+                    <p class="card-text">@artist.BiographyEN</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mb-5">
+        <ArtistTrackList Tracks="topTracks"></ArtistTrackList>
+        <ArtistAlbumList Albums="artist.Albums"></ArtistAlbumList>
+    </div>
+    
+}
+else
+{
+    <PageTitle>Loading...</PageTitle>
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+
+@code {
+    private ArtistDetails? artist;
+    private TrackListItem[] topTracks = Array.Empty<TrackListItem>();
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+
+        await LoadArtist();
+    }
+
+    private async Task LoadArtist()
+    {
+        artist = await ArtistsService.GetArtistDetailsAsync(Id);
+    }
+
+    private async Task LoadTopTracks()
+    {
+        topTracks = await ArtistsService.GetArtistTopTracksAsync(Id);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        base.OnParametersSetAsync();
+
+        await LoadArtist();
+        await LoadTopTracks();
+    }
+
+}

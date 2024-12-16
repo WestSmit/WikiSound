@@ -1,0 +1,74 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims;
+@using System.Security.Cryptography;
+@using WikiSound.Client.Services;
+@inject IJSRuntime JS;
+@inject IAuthService Auth;
+
+<div class="m-0 p-0" style="width: 200px">
+    <div class="@menuClass" @onclick="() => showMenu = !showMenu">
+        <img src="@gravatarUrl" class="img-fluid rounded rounded-circle col-3 p-0" alt="avatar" width="40">
+        <div class="col-6 p-0 text-center">@userName</div>
+        <div class="col-2 p-0">
+            <span class="oi oi-menu text-secondary"></span>
+        </div>
+    </div>
+    @if (showMenu)
+    {
+        <ul class="list-group position-absolute shadow-lg border border-top-0 rounded-end bg-black" style="z-index: 3; width: 200px">
+            <NavLink class="cursor-pointer btn btn-dark rounded-0 border-0 border-top border-secondary" href="/favorites" Match="NavLinkMatch.All">
+                <span class="oi oi-heart" aria-hidden="true"></span> Favorites
+            </NavLink>
+            <NavLink class="cursor-pointer btn btn-dark rounded-0 border-0 border-top border-secondary" @onclick="Auth.LogoutAsync">
+                <span class="oi oi-account-logout" aria-hidden="true"></span> LogOut
+            </NavLink>
+        </ul>
+    }
+</div>
+
+@code {
+    private string gravatarUrl = string.Empty;
+    private string userName = string.Empty;
+    private bool showMenu = false;
+
+    private string menuClass
+    {
+        get
+        {
+            return showMenu
+                ? "row align-items-center justify-content-between m-0 p-1 border border-bottom-0 rounded-top"
+                : "row align-items-center justify-content-between m-0 p-1";
+        }
+    }
+
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationState { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var user = await AuthenticationState;
+
+        if (user.User?.Identity?.IsAuthenticated ?? false)
+        {
+            userName = user.User.Identity.Name;
+            gravatarUrl = await GetUserImage();
+        }
+    }
+
+    private async Task<string> GetUserImage()
+    {
+        var user = await AuthenticationState;
+
+        if (user.User?.Identity?.IsAuthenticated ?? false)
+        {
+
+            var email =  user.User.Claims
+                .Single(x => x.Type == ClaimTypes.Email)
+                .Value;
+
+            return await JS.InvokeAsync<string>("jsGravatar", new { email = email, size = 100, defaultImage = "mp" });
+        }
+
+        return "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+    }
+}

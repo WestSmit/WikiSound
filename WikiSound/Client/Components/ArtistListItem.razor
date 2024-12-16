@@ -1,0 +1,35 @@
+﻿@using WikiSound.Shared;
+@inject NavigationManager Navigation
+
+<div class="col-12 col-md-3 col-lg-3 col-xl-2 card p-0 bg-dark text-light border-dark shadow">
+    @if (@Artist.ArtistWideThumb is not null)
+    {
+        <img src="@Artist.ArtistWideThumb" class="card-img-top" alt="...">
+    }
+    <div class="card-body">
+        <h5 class="card-title">@Artist.Name</h5>
+        <p class="card-text">@FormatText(Artist.BiographyEN)</p>
+        <button @onclick="() => ToArtistPage(Artist.Id)" class="btn btn-primary">
+            <span class="oi oi-menu"></span>
+            Details</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ArtistListPageItem Artist { get; set; }
+
+    private string? FormatText(string text)
+    {
+        const int charNumber = 100;
+
+        return text is not null && text.Length > charNumber
+            ? text.Substring(0, charNumber) + "..."
+            : string.Empty;
+    }
+
+    private void ToArtistPage(int id)
+    {
+        Navigation.NavigateTo($"/artist/{id}");
+    }
+}

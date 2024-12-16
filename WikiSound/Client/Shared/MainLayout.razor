@@ -1,0 +1,53 @@
+﻿@using WikiSound.Client.Components;
+@using Microsoft.AspNetCore.Components.Authorization;
+@using WikiSound.Client.Services;
+@inherits LayoutComponentBase
+@inject IAuthService Auth;
+
+<div class="page text-light">
+@*    <div class="sidebar">
+        <NavMenu />
+    </div>*@
+    <div class="row p-0 pt-2 justify-content-center justify-content-md-between m-0">
+        <div class="col-4 col-md-3 col-lg-3 col-xl-4 row p-0 m-0">
+            <div class="nav-item col-auto p-0">
+                <NavLink class="btn btn-dark" href="" Match="NavLinkMatch.All">
+                    <span class="oi oi-home" aria-hidden="true"></span> Home
+                </NavLink>
+            </div>
+        </div>
+        <div class="col-8 col-md-3 col-lg-3 col-xl-4 row justify-content-end order-md-last px-2 m-0">
+            <AuthorizeView>
+                <Authorized>
+                    <div class="nav-item col-auto p-0">
+                        <UserMenu></UserMenu>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="nav-item col-auto p-0">
+                        <NavLink class="btn btn-dark" href="/register" Match="NavLinkMatch.All">
+                            <span class="oi oi-pencil" aria-hidden="true"></span> Register
+                        </NavLink>
+                    </div>
+                    <div class="nav-item col-auto p-0">
+                        <NavLink class="btn btn-dark" href="/login" Match="NavLinkMatch.All">
+                            <span class="oi oi-account-login" aria-hidden="true"></span> LogIn
+                        </NavLink>
+                    </div>
+
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+        <div class="col-11 col-md-6 col-lg-5 col-xl-3 p-0 m-0 mt-2 mt-md-0">
+            <SearchForm></SearchForm>
+        </div>
+        
+    </div>
+
+    <main class="p-0">
+        <article class="content">
+            @Body
+        </article>
+    </main>
+    <footer></footer>
+</div>

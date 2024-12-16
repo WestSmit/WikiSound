@@ -1,0 +1,12 @@
+﻿.top-section-banner {
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: cover;
+    width: 100vw;
+    height: 300px;
+}
+
+.top-section-content {
+    margin: 0 auto;
+    margin-top: -50px;
+}

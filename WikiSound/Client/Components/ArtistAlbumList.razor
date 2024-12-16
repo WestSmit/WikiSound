@@ -1,0 +1,97 @@
+﻿@using WikiSound.Shared;
+@inject NavigationManager Navigation;
+
+<div class="row p-2 text-white justify-content-between gap-2">
+    <div class="col p-0 m-0">
+        <div class="h3 d-inline-block m-0">Albums</div>
+    </div>
+        <div class="col-auto text-light align-self-center">
+        @for (int i = 1; i <= displayAlbumsTotalPages; i++)
+        {
+            if (displayAlbumsPage == i)
+            {
+                <span class="oi oi-media-record small m-1" aria-hidden="true"></span>
+            }
+            else
+            {
+                var page = i;
+
+                <span class="oi oi-media-record small text-muted m-1 cursor-pointer" aria-hidden="true" @onclick="() => GetPage(page)"></span>
+            }
+        }
+    </div>
+    <button class="btn btn-dark col-auto rounded-circle shadow" @onclick="GetPrevious">
+        <span class="oi oi-chevron-left" aria-hidden="true"></span>
+    </button>
+    <button class="btn btn-dark col-auto rounded-circle shadow" @onclick="GetNext">
+        <span class="oi oi-chevron-right" aria-hidden="true"></span>
+    </button>
+</div>
+<div class="row justify-content-center">
+    @foreach (var album in displayAlbums)
+    {
+        <div class="col-5 col-md-4 col-lg-2 btn btn-outline-secondary border-0" @onclick="() => ToAlbum(album.Id)">
+            <img src="@album.AlbumThumb" class="img-thumbnail shadow" alt="ArtistThumb">
+            <div class="text-white">@album.Name</div>
+            <div class="small">@album.ReleaseFormat @album.YearReleased</div>
+        </div>
+    }
+</div>
+
+
+@code {
+    private ArtistDetails.AlbumListItem[] displayAlbums { get; set; }
+    private int displayAlbumsPage = 1;
+    private int displayAlbumsTotalPages;
+    private const int displayAlbumsNumber = 6;
+
+    [Parameter]
+    public ArtistDetails.AlbumListItem[] Albums { get; set; }
+
+    protected override Task OnParametersSetAsync()
+    {
+        displayAlbumsTotalPages = (int)Math.Ceiling(Albums.Length / (double)displayAlbumsNumber);
+        DisplayAlbums();
+
+        return base.OnParametersSetAsync();
+    }
+
+    private void GetNext()
+    {
+        if (displayAlbumsPage == displayAlbumsTotalPages)
+        {
+            return;
+        }
+        displayAlbumsPage++;
+        DisplayAlbums();
+    }
+
+    private void GetPrevious()
+    {
+        if (displayAlbumsPage == 1)
+        {
+            return;
+        }
+        displayAlbumsPage--;
+        DisplayAlbums();
+    }
+
+    private void GetPage(int page)
+    {
+        displayAlbumsPage = page;
+        DisplayAlbums();
+    }
+
+    private void DisplayAlbums()
+    {
+        displayAlbums = Albums
+            .Skip((displayAlbumsPage - 1) * displayAlbumsNumber)
+            .Take(displayAlbumsNumber)
+            .ToArray();
+    }
+
+    private void ToAlbum(int id)
+    {
+        Navigation.NavigateTo($"albums/{id}");
+    }
+}
